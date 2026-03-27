@@ -1,1 +1,1 @@
-New-LocalUser -Name (Read-Host "Enter user's name") -password (Read-Host -AsSecureString "Enter a secure password") -Description (Read-Host "Enter user's description")
+New-LocalUser -Name (Read-Host "Enter user's name") -password (Read-Host -AsSecureString "Enter a secure password") -Description (Read-Host "Enter user's description") Add-localgroupmember (Read-Host "Designate group to add user")
