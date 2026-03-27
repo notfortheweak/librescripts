@@ -1,22 +1,23 @@
-# Define the path to the folder you want to modify
-$FolderPath = ""
+# Define variables
+$groupName = Read-Host "Enter Group Name"
+$folderPath = Read-Host "Enter Folder Path"
+$accessLevel = "Read" # Example: Read, Modify, FullControl, etc.
+$action = "Allow" # Allow or Deny
 
-# Define the name of the group you want to grant permissions to
-$GroupName = ""
+# Create a new FileSystemAccessRule object
+$accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+    $groupName,
+    $accessLevel,
+    "ContainerInherit,ObjectInherit", # Inheritance flags
+    "None", # Propagation flags
+    $action
+)
 
-# Get the existing ACL for the folder
-$Acl = Get-Acl -Path $FolderPath
+# Get the current ACL for the folder
+$acl = Get-Acl -Path $folderPath
 
-# Create a new access rule that grants full control to the specified group
-$AccessRule = New-Object
-System.Security.AccessControl.FileSystemAccessRule($GroupName,
-"FullControl", "ContainerInherit, ObjectInherit", "None", "Allow")
+# Add the new access rule
+$acl.AddAccessRule($accessRule)
 
-# Add the access rule to the ACL
-$Acl.AddAccessRule($AccessRule)
-
-# Set the modified ACL back on the folder
-Set-Acl -Path $FolderPath -AclObject $Acl
-
-Write-Host "Full control has been granted to the group '$GroupName' for the
-folder '$FolderPath'."
+# Set the modified ACL back to the folder
+Set-Acl -Path $folderPath -AclObject $acl
