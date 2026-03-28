@@ -1,1 +1,10 @@
-New-LocalUser -Name (Read-Host "Enter user's name") -password (Read-Host -AsSecureString "Enter a secure password") -Description (Read-Host "Enter user's description") Add-localgroupmember (Read-Host "Designate group to add user")
+# 1. Create the new local user
+$Username = Read-Host "Enter username"
+$Password = Read-Host -AsSecureString "Enter Password"
+$Group = Read-Host "Enter user group assignment"
+$Description = Read-Host "Enter Description"
+New-LocalUser -Name $Username -Password $Password -Description $Description
+
+# 2. Add the user to a group (e.g., Administrators or Users)
+Add-LocalGroupMember -Group $Group -Member $Username
+
