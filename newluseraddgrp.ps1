@@ -1,4 +1,3 @@
-#prompt for user creation.
 $createuserResponse = Read-Host "Do you want to create a new user? (Y/N)"
 
 if ($createuserResponse -eq "Y") {
@@ -12,9 +11,7 @@ if ($createuserResponse -eq "Y") {
     Write-Host "User creation skipped."
 }
 
-# 1  Prompt for group creation
 $Response = Read-Host "Do you want to create a new group? (Y/N)"
-
 if ($Response -eq "Y") {
     # 2. Ask for the group name
     $GroupName = Read-Host "Enter desired group name."
@@ -30,6 +27,19 @@ if ($Response -eq "Y") {
     Write-Host "Group creation canceled."
 }
 
+$createNewFolder = Read-Host "Create new Folder? (Y/n)"
+if ($createNewFolder -eq "Y") {
+    $folderPath = Read-Host "Enter the path for the new folder"
+    try {
+        New-Item -Path $folderPath -ItemType Directory
+        Write-Host "Folder created successfully at $folderPath"
+    } catch {
+        Write-Error "Folder creation failed: $_"
+    }
+} else {
+    Write-Host "Folder creation skipped."
+    
+}
 
 $addUserGroup = Read-Host "Assign users to groups? (Y/N)"
 if ($addUserGroup -eq "Y") {
