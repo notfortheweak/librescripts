@@ -1,3 +1,19 @@
+#prompt for user creation.
+$createuserResponse = Read-Host "Do you want to create a new user? (Y/N)"
+
+if ($createuserResponse -eq "Y") {
+    #prompt for user creds.
+    $Username = Read-Host "Enter username"
+    $Password = Read-Host -AsSecureString "Enter Password"
+    $Description = Read-Host "Enter Description"
+} try{
+    New-LocalUser -Name $Username -Password $Password -Description $Description
+} catch {
+    Write-Error "User creation failed: $_"
+} else {
+    Write-Host "User creation canceled."
+}
+
 # 1  Prompt for group creation
 $Response = Read-Host "Do you want to create a new group? (Y/N)"
 
@@ -16,22 +32,17 @@ if ($Response -eq "Y") {
     Write-Host "Group creation canceled."
 }
 
-#prompt for user creation.
-$createuserResponse = Read-Host "Do you want to create a new user? (Y/N)"
 
-if ($createuserResponse -eq "Y") {
-    #prompt for user creds.
-    $Username = Read-Host "Enter username"
-    $Password = Read-Host -AsSecureString "Enter Password"
-    $Description = Read-Host "Enter Description"
-} try{
-    New-LocalUser -Name $Username -Password $Password -Description $Description
-} catch {
-    Write-Error "User creation failed: $_"
+$addUserGroup = Read-Host "Assign users to groups? (Y/N)"
+if ($addUserGroup -eq "Y") {
+    $targetUser = Read-Host "Enter desired username"
+    $targetGroup = Read-Host "Enter group name"
+    try {
+        Add-LocalGroupMember -Group $targetGroup -Member $targetUser
+    } catch {
+      Write-Error "User group  assignment failed: $_"
+    }
 } else {
-    Write-Host "User creation canceled."
+    Write-Host "Exiting..."
 }
 
-
-# 3. Add the user to a group (e.g., Administrators or Users)
-Add-LocalGroupMember -Group $Group -Member $Username
