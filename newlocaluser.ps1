@@ -16,21 +16,13 @@ if ($Response -eq "Y") {
     Write-Host "Group creation canceled."
 }
 
-#prompt for user creation.
-$createuserResponse = Read-Host "Do you want to create a new user? (Y/N)"
+# 2.  Create the new local user
+$Username = Read-Host "Enter username"
+$Password = Read-Host -AsSecureString "Enter Password"
+$Group = Read-Host "Enter user group assignment"
+$Description = Read-Host "Enter Description"
+New-LocalUser -Name $Username -Password $Password -Description $Description
 
-if ($createuserResponse -eq "Y") {
-    #prompt for user creds.
-    $Username = Read-Host "Enter username"
-    $Password = Read-Host -AsSecureString "Enter Password"
-    $Description = Read-Host "Enter Description"
-} try{
-    New-LocalUser -Name $Username -Password $Password -Description $Description
-} catch {
-    Write-Error "User creation failed: $_"
-} else {
-    Write-Host "User creation canceled."
-}
 
 
 # 3. Add the user to a group (e.g., Administrators or Users)
