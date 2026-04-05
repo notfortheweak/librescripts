@@ -6,12 +6,10 @@ if ($createuserResponse -eq "Y") {
     $Username = Read-Host "Enter username"
     $Password = Read-Host -AsSecureString "Enter Password"
     $Description = Read-Host "Enter Description"
-} try{
     New-LocalUser -Name $Username -Password $Password -Description $Description
-} catch {
-    Write-Error "User creation failed: $_"
-} else {
-    Write-Host "User creation canceled."
+}
+ else {
+    Write-Host "User creation skipped."
 }
 
 # 1  Prompt for group creation
@@ -45,4 +43,3 @@ if ($addUserGroup -eq "Y") {
 } else {
     Write-Host "Exiting..."
 }
-
