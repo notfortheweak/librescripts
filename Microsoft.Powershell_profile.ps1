@@ -4,8 +4,6 @@ import-module PSGit
 import-module PSWindowsUpdate
 import-module PackageManagement
 
-install-module WindowsUpdate --acceptalle
-
 
 function prompt {
     $originalPrompt = (Get-Command Prompt).ScriptBlock
