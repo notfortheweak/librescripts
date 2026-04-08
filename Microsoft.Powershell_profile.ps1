@@ -1,4 +1,4 @@
-
+$originalPrompt = (Get-Command Prompt).ScriptBlock
 import-module PSGit
 import-module PSWindowsUpdate
 import-module PackageManagement
@@ -26,4 +26,8 @@ function prompt {
     "`$$('>' * ($nestedPromptLevel)) "
     $Host.UI.RawUI.WindowTitle = "$((Get-Location).Path)>"
     "PS $($executionContext.SessionState.Path.CurrentLocation)> "
+    Write-Host ("[" + (Get-Date -Format "HH:mm:ss") + "] ") -NoNewline -ForegroundColor Cyan
+    
+    # Invoke the original scriptblock to maintain functionality
+    Invoke-Command -ScriptBlock $originalPrompt
 }
