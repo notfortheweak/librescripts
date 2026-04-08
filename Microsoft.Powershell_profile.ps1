@@ -1,7 +1,9 @@
 import-module PSGit
 import-module PSWindowsUpdate
 import-module PackageManagement
-
+import-module ImportExcel
+import-module NTFSSecurity
+import-module AzureAD
 
 function prompt {
     $UserProf = $env:USERPROFILE -replace '[A-Za-z]:\\' -replace '([\\\.\(\)\{\}\?])','\$1'
