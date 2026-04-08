@@ -4,9 +4,11 @@ import-module PSGit
 import-module PSWindowsUpdate
 import-module PackageManagement
 
+install-module WindowsUpdate --acceptalle
 
 
 function prompt {
+    $originalPrompt = (Get-Command Prompt).ScriptBlock
     $UserProf = $env:USERPROFILE -replace '[A-Za-z]:\\' -replace '([\\\.\(\)\{\}\?])','\$1'
     $Location = "$(Get-Location)" -replace "([A-Za-z][:\$]\\)$UserProf",'$1~' -replace '(?<=^[A-Za-z\~]:{0,1}\\([^\\~]+\\){2})([^\\~]+\\)+(?=[^\\]+\\[^\\]+$)','..\' -replace '(?<=^)C:\\~','~'
     $isAdmin  = [Security.Principal.WindowsPrincipal]::New(
