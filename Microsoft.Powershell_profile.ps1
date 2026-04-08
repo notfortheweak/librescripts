@@ -29,5 +29,6 @@ function prompt {
     Write-Host ("[" + (Get-Date -Format "HH:mm:ss") + "] ") -NoNewline -ForegroundColor Cyan
     
     # Invoke the original scriptblock to maintain functionality
-    Invoke-Command -ScriptBlock $originalPrompt
+    Invoke-Command -ScriptBlock $originalPrompt\
+    clear-host
 }
