@@ -26,4 +26,5 @@ function prompt {
     Write-Host -NoNewline ':'
     Write-Host -ForegroundColor DarkCyan $Location -NoNewline
     "`$$('>' * ($nestedPromptLevel)) "
+    $Host.UI.RawUI.WindowTitle = "$((Get-Location).Path)>"
 }
