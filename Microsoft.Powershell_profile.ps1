@@ -1,7 +1,6 @@
 import-module PSGit
 import-module PSWindowsUpdate
 import-module PackageManagement
-import-module ImportExcel
 import-module NTFSSecurity
 import-module AzureAD
 
