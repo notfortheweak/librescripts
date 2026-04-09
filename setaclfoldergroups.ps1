@@ -90,6 +90,8 @@ while ($continue) {
     $accessType = [System.Security.AccessControl.AccessControlType]::$typeInput
     $rule = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritFlags, $propagationFlags, $accessType)
     $acl.AddAccessRule($rule)
+    Write-Host "Current access rules for '$path':" -ForegroundColor Cyan
+    $acl.Access | Format-Table IdentityReference, FileSystemRights, AccessControlType, IsInherited -AutoSize
 
     $continue = Read-YesNo "Add another rule? (Yes/No)"
 }
