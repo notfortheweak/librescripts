@@ -1,103 +1,68 @@
-function Get-FileSystemRights {
-    param([string]$inputRights)
+$createuserResponse = Read-Host "Do you want to create a new user? (Y/N)"
 
-    $rights = 0
-    $values = $inputRights -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' }
-    foreach ($value in $values) {
+while ($createuserResponse -eq "Y") {
+    #prompt for user creds.
+    $Username = Read-Host "Enter username"
+    $Password = Read-Host -AsSecureString "Enter Password"
+    $Description = Read-Host "Enter Description"
+    New-LocalUser -Name $Username -Password $Password -Description $Description
+    
+    $createuserResponse = Read-Host "Do you want to create another user? (Y/N)"
+}
+
+Write-Host "User creation completed."
+
+$Response = Read-Host "Do you want to create a new group? (Y/N)"
+while ($Response -eq "Y") {
+    # Ask for the group name
+    $GroupName = Read-Host "Enter desired group name."
+
+    # Attempt Group Creation
+    try {
+        New-LocalGroup -Name $GroupName
+        Write-Host "Group '$GroupName' created successfully."
+    } catch {
+        Write-Error "Group creation failed: $_"
+    }
+    
+    $Response = Read-Host "Do you want to create another group? (Y/N)"
+}
+
+Write-Host "Group creation completed."
+
+$createNewFolder = Read-Host "Create new Folder? (Y/N)"
+while ($createNewFolder -eq "Y") {
+    $folderPath = Read-Host "Enter the path for the new folder"
+    try {
+        New-Item -Path $folderPath -ItemType Directory
+        Write-Host "Folder created successfully at $folderPath"
+    } catch {
+        Write-Error "Folder creation failed: $_"
+    }
+    
+    $createNewFolder = Read-Host "Create another folder? (Y/N)"
+}
+
+Write-Host "Folder creation completed."
+
+$addUserGroup = Read-Host "Assign users to groups? (Y/N)"
+while ($addUserGroup -eq "Y") {
+    $targetGroup = Read-Host "Enter group name"
+    
+    $addAnotherUser = Read-Host "Add a user to '$targetGroup'? (Y/N)"
+    while ($addAnotherUser -eq "Y") {
+        $targetUser = Read-Host "Enter username to add to '$targetGroup'"
         try {
-            $enumValue = [System.Security.AccessControl.FileSystemRights]::$value
-            $rights = $rights -bor $enumValue
+            Add-LocalGroupMember -Group $targetGroup -Member $targetUser
+            Write-Host "User '$targetUser' added to group '$targetGroup' successfully."
         } catch {
-            Write-Host "Invalid permission: '$value'" -ForegroundColor Yellow
-            return $null
+            Write-Error "User group assignment failed: $_"
         }
+        
+        $addAnotherUser = Read-Host "Add another user to '$targetGroup'? (Y/N)"
     }
-
-    return $rights
+    
+    $addUserGroup = Read-Host "Assign users to another group? (Y/N)"
 }
 
-
-
-function Read-YesNo {
-    param([string]$prompt)
-
-    do {
-        $answer = Read-Host $prompt
-        $normalized = $answer.Trim().ToLower()
-    } while ($normalized -notin @('y', 'n', 'yes', 'no'))
-
-    return $normalized -in @('y', 'yes')
-}
-
-$path = Read-Host "Enter the full path of the file or folder to modify"
-if (-not (Test-Path -Path $path)) {
-    Write-Host "Path '$path' does not exist." -ForegroundColor Red
-    exit 1
-}
-
-$acl = Get-Acl -Path $path
-Write-Host "Current access rules for '$path':" -ForegroundColor Cyan
-$acl.Access | Format-Table IdentityReference, FileSystemRights, AccessControlType, IsInherited -AutoSize
-
-$mode = Read-Host "Choose mode ('Add' to append rules, 'Replace' to remove existing explicit rules before adding new ones)"
-if ($mode -notin @('Add', 'Replace')) {
-    Write-Host "Mode must be 'Add' or 'Replace'. Exiting." -ForegroundColor Red
-    exit 1
-}
-
-if ($mode -eq 'Replace') {
-    # Disable inheritance and remove any inherited rules, then clear explicit rules
-    $acl.SetAccessRuleProtection($true, $false)
-    $existingRules = $acl.Access
-    foreach ($existingRule in $existingRules) {
-        $acl.RemoveAccessRuleAll($existingRule)
-    }
-    Write-Host "Cleared existing access rules and disabled inheritance." -ForegroundColor Cyan
-} elseif ($mode -eq 'Add') {
-    Write-Host "Add mode selected. Existing rules will be preserved and new rules appended." -ForegroundColor Cyan
-}
-
-$continue = $true
-while ($continue) {
-    $identity = Read-Host "Enter the user or group to modify (e.g. 'DOMAIN\\User' or 'GroupName')"
-    if (-not $identity) {
-        Write-Host "Identity cannot be empty." -ForegroundColor Yellow
-        continue
-    }
-
-    $typeInput = Read-Host "Enter access type ('Allow' or 'Deny')"
-    if ($typeInput -notin @('Allow', 'Deny')) {
-        Write-Host "Access type must be 'Allow' or 'Deny'." -ForegroundColor Yellow
-        continue
-    }
-
-    $rightsInput = Read-Host "Enter permissions (comma-separated). Examples: Read, ReadAndExecute, Write, Modify, FullControl"
-    $rights = Get-FileSystemRights -inputRights $rightsInput
-    if ($rights -eq $null -or $rights -eq 0) {
-        Write-Host "Invalid or empty permissions specified." -ForegroundColor Yellow
-        continue
-    }
-
-    $inheritFlags = [System.Security.AccessControl.InheritanceFlags]::None
-    $propagationFlags = [System.Security.AccessControl.PropagationFlags]::None
-    if (Test-Path -Path $path -PathType Container) {
-        if (Read-YesNo "Apply this rule to child objects as well? (Yes/No)") {
-            $inheritFlags = [System.Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [System.Security.AccessControl.InheritanceFlags]::ObjectInherit
-            $propagationFlags = [System.Security.AccessControl.PropagationFlags]::None
-        }
-    }
-
-    $accessType = [System.Security.AccessControl.AccessControlType]::$typeInput
-    $rule = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritFlags, $propagationFlags, $accessType)
-    $acl.AddAccessRule($rule)
-    Write-Host "Current access rules for '$path':" -ForegroundColor Cyan
-    $acl.Access | Format-Table IdentityReference, FileSystemRights, AccessControlType, IsInherited -AutoSize
-
-    $continue = Read-YesNo "Add another rule? (Yes/No)"
-}
-
-Set-Acl -Path $path -AclObject $acl
-Write-Host "ACL updated successfully for '$path'." -ForegroundColor Green
-
-Write-Host "Updated access rules:" -ForegroundColor Cyan
-Get-Acl -Path $path | Select-Object -ExpandProperty Access | Format-Table IdentityReference, FileSystemRights, AccessControlType, IsInherited -AutoSize
+Write-Host "User group assignment completed."
