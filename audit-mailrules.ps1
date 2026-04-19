@@ -38,7 +38,7 @@ try {
 
 # Get all mail rules including hidden for a user which is prompted for, display the rules inluding their creation date& time, the rule details, and the rule's enabled status.
 $Mailbox = Read-Host "Enter the email address of the mailbox"
-$Rules = Get-MailRule -Identity $Mailbox
+$Rules = Get-InboxRule -Identity $Mailbox
 $Rules | Select-Object Name, CreationTime, Enabled, Conditions, Actions
 
 # Export the Exchange Online mail rules to a CSV file, the file name should include the user's name and the date of export.
@@ -48,9 +48,9 @@ $Rules | Select-Object Name, CreationTime, Enabled, Conditions, Actions | Export
 # Anticipate end user wanting to delete all recently created mail rules within the last 72 hours and provide an option to do so, if the user opts to delete the recently created mail rules, delete all mail rules created within the last 72 hours and display the names of the deleted rules
 $DeleteRecentlyCreatedRules = Read-Host "Do you want to delete all recently created mail rules within the last 72 hours? (y/n)"
 if ($DeleteRecentlyCreatedRules.ToLower() -eq "y") {
-    $DeletedRules = Get-MailRule -Identity $Mailbox | Where-Object { $_.CreationTime -gt (Get-Date).AddHours(-72) }
+    $DeletedRules = Get-InboxRule -Identity $Mailbox | Where-Object { $_.CreationTime -gt (Get-Date).AddHours(-72) }
     foreach ($Rule in $DeletedRules) {
-        Remove-MailRule -Identity $Rule.Identity
+        Remove-InboxRule -Identity $Rule.Identity
         Write-Host "Deleted rule: $($Rule.Name)"
     }
 }
@@ -63,7 +63,7 @@ if ($SweepRules.Count -gt 0) {
     $DeleteSweepRules = Read-Host "Do you want to delete all sweep rules? (y/n)"
     if ($DeleteSweepRules.ToLower() -eq "y") {
         foreach ($Rule in $SweepRules) {
-            Remove-MailRule -Identity $Rule.Identity
+            Remove-InboxRule -Identity $Rule.Identity
             Write-Host "Deleted rule: $($Rule.Name)"
         }
     }
