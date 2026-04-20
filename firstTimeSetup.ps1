@@ -48,3 +48,51 @@ if (-not $packageManagementModule) {
 } else {
     Write-Host "PackageManagement module is already installed."
 }
+
+# Check and Install PSWindowsUpdate Module:
+$pswindowsupdateModule = Get-Module -ListAvailable -Name PSWindowsUpdate -ErrorAction SilentlyContinue
+if (-not $pswindowsupdateModule) {
+    Write-Host "PSWindowsUpdate module not found. Do you want to install it? [Y/N]"
+    $installPsWindowsUpdate = Read-Host
+    if ($installPsWindowsUpdate.ToLower() -eq 'y') {
+        Write-Host "Installing PSWindowsUpdate module..."
+        Install-Module -Name PSWindowsUpdate -Force -Confirm:$false
+        Write-Host "PSWindowsUpdate module installed successfully."
+    } else {
+        Write-Host "PSWindowsUpdate module not installed."
+    }
+} else {
+    Write-Host "PSWindowsUpdate module is already installed."
+}
+
+# Check and Install Az Module:
+$azModule = Get-Module -ListAvailable -Name Az -ErrorAction SilentlyContinue
+if (-not $azModule) {
+    Write-Host "Az module not found. Do you want to install it? [Y/N]"
+    $installAz = Read-Host
+    if ($installAz.ToLower() -eq 'y') {
+        Write-Host "Installing Az module..."
+        Install-Module -Name Az -AllowClobber -Force -SkipPublisherCheck -Confirm:$false
+        Write-Host "Az module installed successfully."
+    } else {
+        Write-Host "Az module not installed."
+    }
+} else {
+    Write-Host "Az module is already installed."
+}
+
+# Check and Install ActiveDirectory Module:
+$activeDirectoryModule = Get-Module -ListAvailable -Name ActiveDirectory -ErrorAction SilentlyContinue
+if (-not $activeDirectoryModule) {
+    Write-Host "ActiveDirectory module not found. Do you want to install it? [Y/N]"
+    $installActiveDirectory = Read-Host
+    if ($installActiveDirectory.ToLower() -eq 'y') {
+        Write-Host "Installing ActiveDirectory module..."
+        Install-Module -Name ActiveDirectory -Force -Confirm:$false
+        Write-Host "ActiveDirectory module installed successfully."
+    } else {
+        Write-Host "ActiveDirectory module not installed."
+    }
+} else {
+    Write-Host "ActiveDirectory module is already installed."
+}
