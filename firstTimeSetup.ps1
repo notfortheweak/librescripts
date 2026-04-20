@@ -1,50 +1,78 @@
-# Check execution policy, set to unrestricted if not already set to allow script execution.
-$executionPolicy = Get-ExecutionPolicy -ErrorAction SilentlyContinue
-if ($executionPolicy.ToString() -ne "Unrestricted") {
-    Write-Host "Current Execution Policy: $executionPolicy"
-    Write-Host "Setting Execution Policy to Unrestricted..."
-    Set-ExecutionPolicy Unrestricted -Force -Confirm:$false
-    Write-Host "Execution Policy set successfully."
-} else {
-    Write-Host "Execution Policy is already set to $executionPolicy."
-}
+# Enable verbose output for detailed logging
+$VerbosePreference = 'Continue'
 
-# Check to see if PSGallery is installed and if not install it.
-$psGalleryProvider = Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue
-if (-not $psGalleryProvider) {
-    Write-Host "NuGet Package Provider not found. Installing..."
-    Install-PackageProvider -Name NuGet -Force -Confirm:$false
-    Write-Host "NuGet Package Provider installed successfully."
-} else {
-    Write-Host "$psGalleryProvider Package Provider is already installed."
-}
+try {
+    # Prompt the user to set the execution policy
+    $policyOptions = @("Unrestricted", "RemoteSigned", "AllSigned", "Restricted")
+    Write-Host "Please select an execution policy:"
+    foreach ($policy in $policyOptions) {
+        Write-Host "[$($policyOptions.IndexOf($policy) + 1)] $policy"
+    }
+    
+    while (-not $validPolicySelected) {
+        $selectedPolicyIndex = Read-Host -Prompt "Enter the number corresponding to your choice"
+        
+        if ($selectedPolicyIndex -ge 1 -and $selectedPolicyIndex -le $policyOptions.Length) {
+            $selectedPolicy = $policyOptions[$selectedPolicyIndex - 1]
+            Write-Verbose "User selected policy: $selectedPolicy"
+            $validPolicySelected = $true
+        } else {
+            Write-Warning "Invalid selection. Please choose a valid number."
+        }
+    }
 
-# Check to see if PSGallery is set as a trusted repository, set it to trusted if not already set.
-$psGalleryRepository = Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue
-if (-not $psGalleryRepository.IsTrusted) {
-    Write-Host "PSGallery repository not trusted. Setting to trusted..."
-    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-    Write-Host "PSGallery repository set to trusted."
-} else {
-    Write-Host "PSGallery repository is already trusted."
-}
+    # Check and set execution policy to the user's choice
+    $executionPolicy = Get-ExecutionPolicy -ErrorAction Stop
+    if ($executionPolicy.ToString() -ne $selectedPolicy) {
+        Write-Host "Current Execution Policy: $executionPolicy"
+        Write-Verbose "Setting Execution Policy to $selectedPolicy..."
+        Set-ExecutionPolicy $selectedPolicy -Force -Confirm:$false
+        Write-Host "Execution Policy set successfully."
+    } else {
+        Write-Host "Execution Policy is already set to $executionPolicy."
+    }
 
-# Check to see if PowershellGet is installed, install if not installed.
-$powerShellGetModule = Get-Module -ListAvailable -Name PowerShellGet -ErrorAction SilentlyContinue
-if (-not $powerShellGetModule) {
-    Write-Host "PowerShellGet module not found. Installing..."
-    Install-Module -Name PowerShellGet -Force -Confirm:$false
-    Write-Host "PowerShellGet module installed successfully."
-} else {
-    Write-Host "PowerShellGet module is already installed."
-}
+    # Check and install NuGet Package Provider if not already installed
+    $psGalleryProvider = Get-PackageProvider -Name NuGet -ErrorAction Stop
+    if (-not $psGalleryProvider) {
+        Write-Host "NuGet Package Provider not found. Installing..."
+        Install-PackageProvider -Name NuGet -Force -Confirm:$false
+        Write-Host "NuGet Package Provider installed successfully."
+    } else {
+        Write-Host "$psGalleryProvider Package Provider is already installed."
+    }
 
-# Check to see if PackageManagement is installed, install if not installed.
-$packageManagementModule = Get-Module -ListAvailable -Name PackageManagement -ErrorAction SilentlyContinue
-if (-not $packageManagementModule) {
-    Write-Host "PackageManagement module not found. Installing..."
-    Install-Module -Name PackageManagement -Force -Confirm:$false
-    Write-Host "PackageManagement module installed successfully."
-} else {
-    Write-Host "PackageManagement module is already installed."
+    # Check and set PSGallery as a trusted repository if not already trusted
+    $psGalleryRepository = Get-PSRepository -Name PSGallery -ErrorAction Stop
+    if (-not $psGalleryRepository.IsTrusted) {
+        Write-Host "PSGallery repository not trusted. Setting to trusted..."
+        Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+        Write-Host "PSGallery repository set to trusted."
+    } else {
+        Write-Host "PSGallery repository is already trusted."
+    }
+
+    # Check and install PowerShellGet module if not already installed
+    $powerShellGetModule = Get-Module -ListAvailable -Name PowerShellGet -ErrorAction Stop
+    if (-not $powerShellGetModule) {
+        Write-Host "PowerShellGet module not found. Installing..."
+        Install-Module -Name PowerShellGet -Force -Confirm:$false
+        Write-Host "PowerShellGet module installed successfully."
+    } else {
+        Write-Host "PowerShellGet module is already installed."
+    }
+
+    # Check and install PackageManagement module if not already installed
+    $packageManagementModule = Get-Module -ListAvailable -Name PackageManagement -ErrorAction Stop
+    if (-not $packageManagementModule) {
+        Write-Host "PackageManagement module not found. Installing..."
+        Install-Module -Name PackageManagement -Force -Confirm:$false
+        Write-Host "PackageManagement module installed successfully."
+    } else {
+        Write-Host "PackageManagement module is already installed."
+    }
+
+} catch {
+    Write-Error "An error occurred: $_"
+    exit 1
 }
