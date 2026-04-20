@@ -52,6 +52,15 @@ try {
         Write-Host "PSGallery repository is already trusted."
     }
 
+    # Refresh the PSGallery repository settings
+    try {
+        Unregister-PSRepository -Name PSGallery
+        Register-PSRepository -Default
+        Write-Host "PSGallery repository refreshed successfully."
+    } catch {
+        Write-Error "Failed to refresh PSGallery repository: $_"
+    }
+
     # Check and install PowerShellGet module if not already installed
     $powerShellGetModule = Get-Module -ListAvailable -Name PowerShellGet -ErrorAction Stop
     if (-not $powerShellGetModule) {
@@ -70,6 +79,14 @@ try {
         Write-Host "PackageManagement module installed successfully."
     } else {
         Write-Host "PackageManagement module is already installed."
+    }
+
+    # Update help for all modules
+    try {
+        Update-Help -ErrorAction Stop
+        Write-Host "Help files updated successfully."
+    } catch {
+        Write-Warning "Failed to update help files: $_"
     }
 
 } catch {
