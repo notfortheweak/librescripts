@@ -72,9 +72,3 @@ if ($updateHelp.ToLower() -eq 'y') {
 } else {
     Write-Host "Update of help files skipped."
 }
-
-# Catch and handle any errors gracefully
-catch {
-    Write-Error "An error occurred: $_"
-    exit 1
-}
