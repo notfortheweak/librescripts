@@ -6,7 +6,7 @@ if ($executionPolicy.ToString() -ne "Unrestricted") {
     Set-ExecutionPolicy Unrestricted -Force -Confirm:$false
     Write-Host "Execution Policy set successfully."
 } else {
-    Write-Host "Execution Policy is already set to Unrestricted."
+    Write-Host "Execution Policy is already set to {$executionPolicy}."
 }
 
 # Check to see if PSGallery is installed and if not install it.
