@@ -6,7 +6,7 @@ if ($executionPolicy.ToString() -ne "Unrestricted") {
     Set-ExecutionPolicy Unrestricted -Force -Confirm:$false
     Write-Host "Execution Policy set successfully."
 } else {
-    Write-Host "Execution Policy is already set to {$executionPolicy}."
+    Write-Host "Execution Policy is already set to $executionPolicy."
 }
 
 # Check to see if PSGallery is installed and if not install it.
@@ -16,7 +16,7 @@ if (-not $psGalleryProvider) {
     Install-PackageProvider -Name NuGet -Force -Confirm:$false
     Write-Host "NuGet Package Provider installed successfully."
 } else {
-    Write-Host "NuGet Package Provider is already installed."
+    Write-Host "$psGalleryProvider Package Provider is already installed."
 }
 
 # Check to see if PSGallery is set as a trusted repository, set it to trusted if not already set.
