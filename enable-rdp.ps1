@@ -1,6 +1,5 @@
 # Check if Remote Desktop is enabled
 $remoteDesktopEnabled = (Get-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name 'fDenyTSConnections').fDenyTSConnections
-
 if ($remoteDesktopEnabled) {
     Write-Host "Remote Desktop is currently disabled."
     $enable = Read-Host "Do you wish to enable it? (y/n)"
@@ -10,7 +9,7 @@ if ($remoteDesktopEnabled) {
         Write-Host "Remote Desktop has been enabled."
         
         # Prompt for network-level authentication
-        $networkAuth = Read-Host "Do you wish to set best practice by enabling network-level authentication? (y/n)"
+        $networkAuth = Read-Host "Enable network-level authentication? (y/n)"
         
         if ($networkAuth.ToLower() -eq "y") {
             Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\Winstations\RDP-Tcp' -Name 'UserAuthentication' -Value 1
@@ -22,48 +21,51 @@ if ($remoteDesktopEnabled) {
 } else {
     Write-Host "Remote Desktop is already enabled."
 }
-
 # Display the current registry values
 $rdpSettings = Get-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'
 $fDenyTSConnectionsValue = (Get-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name 'fDenyTSConnections').fDenyTSConnections
-
 Write-Host "Current Remote Desktop settings:"
 Write-Host "fDenyTSConnections: $fDenyTSConnectionsValue"
-
 $rdpTcpSettings = Get-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\Winstations\RDP-Tcp'
 $userAuthValue = (Get-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\Winstations\RDP-Tcp' -Name 'UserAuthentication').UserAuthentication
-
 Write-Host "RDP-Tcp settings:"
 Write-Host "UserAuthentication: $userAuthValue"
-
-# Check current RDP port
-$portNumber = (Get-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp').PortNumber
-
-if ($portNumber) {
-    Write-Host "RDP is currently hosted on port: $portNumber"
+# Prompt to allow RDP through the firewall
+$allowFirewall = Read-Host "Do you wish to run the command Enable-NetFirewallRules -DisplayGroup 'Remote Desktop' to allow RDP sessions through the firewall? (y/n)"
+if ($allowFirewall.ToLower() -eq "y") {
+    Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+    Write-Host "RDP has been allowed through the firewall."
+} else {
+    $exitScript = Read-Host "Do you wish to exit the script? (y/n)"
     
-    $changePort = Read-Host "Do you wish to change the RDP port number? (y/n)"
-    
-    if ($changePort.ToLower() -eq "y") {
-        $portValue = Read-Host "Enter new RDP port number:"
-        
-        try {
-            Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name 'PortNumber' -Value $portValue
-            Write-Host "RDP port has been changed to: $portValue"
-            
-            # Prompt to allow RDP through the firewall on the new port
-            $allowFirewall = Read-Host "Do you wish to run the command Enable-NetFirewallRule -DisplayGroup 'Remote Desktop' to allow RDP sessions through the firewall on the new port? (y/n)"
-            
-            if ($allowFirewall.ToLower() -eq "y") {
-                Set-NetFirewallPortRule -DisplayName 'Remote Desktop' -LocalPort $portValue -Protocol TCP -Action Allow
-                Write-Host "RDP has been allowed through the firewall on port: $portValue."
-            }
-        } catch {
-            Write-Error "Failed to change RDP port. Please check if you have sufficient permissions and try again."
-        }
-    } else {
-        Write-Host "RDP port remains unchanged."
+    if ($exitScript.ToLower() -eq "y") {
+        Write-Host "Exiting script..."
+        exit
     }
 }
 
-Write-Host "Script completed. Thank you for using this script."
+# Add users to Remote Desktop Users group
+$addUsers = Read-Host "Do you wish to add users to the Remote Desktop Users group? (y/n)"
+
+if ($addUsers.ToLower() -eq "y") {
+    do {
+        $username = Read-Host "Enter the username of the user to add (or type 'exit' to finish):"
+        
+        if ($username.ToLower() -eq "exit") {
+            break
+        }
+        
+        # Check if the user exists in local users
+        if (Get-LocalUser -Name $username -ErrorAction SilentlyContinue) {
+            Add-LocalGroupMember -Group "Remote Desktop Users" -Member $username
+            Write-Host "$username has been added to the Remote Desktop Users group."
+        } else {
+            Write-Host "The user $username does not exist. Please check the username and try again."
+        }
+        
+        # Ask if they want to add another user
+        $addAnother = Read-Host "Do you wish to add another user? (y/n)"
+    } while ($addAnother.ToLower() -eq "y")
+}
+
+Write-Host "Exiting script... 'A wiseman once said nothing at all.' - Unknown Proverb"
