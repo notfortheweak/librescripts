@@ -30,6 +30,15 @@ $rdpTcpSettings = Get-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control
 $userAuthValue = (Get-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\Winstations\RDP-Tcp' -Name 'UserAuthentication').UserAuthentication
 Write-Host "RDP-Tcp settings:"
 Write-Host "UserAuthentication: $userAuthValue"
+# Display current firewall rules for Remote Desktop Protocol
+$rdpFirewallRules = Get-NetFirewallRule -DisplayGroup "Remote Desktop"
+if ($rdpFirewallRules.Count -eq 0) {
+    Write-Host "No firewall rules are currently configured for Remote Desktop."
+} else {
+    Write-Host "Current firewall rules for Remote Desktop:"
+    $rdpFirewallRules | Format-Table -AutoSize
+}
+
 # Prompt to allow RDP through the firewall
 $allowFirewall = Read-Host "Do you wish to run the command Enable-NetFirewallRules -DisplayGroup 'Remote Desktop' to allow RDP sessions through the firewall? (y/n)"
 if ($allowFirewall.ToLower() -eq "y") {
@@ -43,10 +52,8 @@ if ($allowFirewall.ToLower() -eq "y") {
         exit
     }
 }
-
 # Add users to Remote Desktop Users group
 $addUsers = Read-Host "Do you wish to add users to the Remote Desktop Users group? (y/n)"
-
 if ($addUsers.ToLower() -eq "y") {
     do {
         $username = Read-Host "Enter the username of the user to add (or type 'exit' to finish):"
@@ -67,5 +74,4 @@ if ($addUsers.ToLower() -eq "y") {
         $addAnother = Read-Host "Do you wish to add another user? (y/n)"
     } while ($addAnother.ToLower() -eq "y")
 }
-
 Write-Host "Exiting script... 'A wiseman once said nothing at all.' - Unknown Proverb"
