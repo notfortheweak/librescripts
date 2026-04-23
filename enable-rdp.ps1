@@ -3,16 +3,16 @@ $remoteDesktopEnabled = (Get-ItemProperty -Path 'HKLM:\System\CurrentControlSet\
 
 if ($remoteDesktopEnabled) {
     Write-Host "Remote Desktop is currently disabled."
-    $enable = Read-Host "Do you wish to enable it? (yes/no)"
+    $enable = Read-Host "Do you wish to enable it? (y/n)"
     
-    if ($enable.ToLower() -eq "yes") {
+    if ($enable.ToLower() -eq "y") {
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name 'fDenyTSConnections' -Value 0
         Write-Host "Remote Desktop has been enabled."
         
         # Prompt for network-level authentication
         $networkAuth = Read-Host "Do you wish to set best practice by enabling network-level authentication? (yes/no)"
         
-        if ($networkAuth.ToLower() -eq "yes") {
+        if ($networkAuth.ToLower() -eq "y") {
             Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\Winstations\RDP-Tcp' -Name 'UserAuthentication' -Value 1
             Write-Host "Network-level authentication has been enabled."
         }
@@ -42,9 +42,9 @@ $portNumber = (Get-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Te
 if ($portNumber) {
     Write-Host "RDP is currently hosted on port: $portNumber"
     
-    $changePort = Read-Host "Do you wish to change the RDP port number? (yes/no)"
+    $changePort = Read-Host "Do you wish to change the RDP port number? (y/n)"
     
-    if ($changePort.ToLower() -eq "yes") {
+    if ($changePort.ToLower() -eq "y") {
         $portValue = Read-Host "Enter new RDP port number:"
         
         try {
@@ -54,7 +54,7 @@ if ($portNumber) {
             # Prompt to allow RDP through the firewall on the new port
             $allowFirewall = Read-Host "Do you wish to run the command Enable-NetFirewallRule -DisplayGroup 'Remote Desktop' to allow RDP sessions through the firewall on the new port? (yes/no)"
             
-            if ($allowFirewall.ToLower() -eq "yes") {
+            if ($allowFirewall.ToLower() -eq "y") {
                 Set-NetFirewallPortRule -DisplayName 'Remote Desktop' -LocalPort $portValue -Protocol TCP -Action Allow
                 Write-Host "RDP has been allowed through the firewall on port: $portValue."
             }
