@@ -10,7 +10,7 @@ if ($remoteDesktopEnabled) {
         Write-Host "Remote Desktop has been enabled."
         
         # Prompt for network-level authentication
-        $networkAuth = Read-Host "Do you wish to set best practice by enabling network-level authentication? (yes/no)"
+        $networkAuth = Read-Host "Do you wish to set best practice by enabling network-level authentication? (y/n)"
         
         if ($networkAuth.ToLower() -eq "y") {
             Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\Winstations\RDP-Tcp' -Name 'UserAuthentication' -Value 1
@@ -52,7 +52,7 @@ if ($portNumber) {
             Write-Host "RDP port has been changed to: $portValue"
             
             # Prompt to allow RDP through the firewall on the new port
-            $allowFirewall = Read-Host "Do you wish to run the command Enable-NetFirewallRule -DisplayGroup 'Remote Desktop' to allow RDP sessions through the firewall on the new port? (yes/no)"
+            $allowFirewall = Read-Host "Do you wish to run the command Enable-NetFirewallRule -DisplayGroup 'Remote Desktop' to allow RDP sessions through the firewall on the new port? (y/n)"
             
             if ($allowFirewall.ToLower() -eq "y") {
                 Set-NetFirewallPortRule -DisplayName 'Remote Desktop' -LocalPort $portValue -Protocol TCP -Action Allow
