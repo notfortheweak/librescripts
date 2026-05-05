@@ -4,6 +4,7 @@ function Prompt-TpmInfo {
     
     if ($PSDefaultParameterValues['Confirm:Yes':'y']) {
         $tpmInfoResult = Read-Host $tpmInfoPrompt -Prompt "Please confirm your response"
+        
         if (-Not [String]::IsNullOrEmpty($tpmInfoResult)) {
             if ($tpmInfoResult -eq 'y') {
                 Write-Output "Getting TpmPresent, TpmReady, TPM Enabled."
@@ -21,6 +22,7 @@ function Prompt-TpmEndorsementKeyInfo {
     
     if ($PSDefaultParameterValues['Confirm:Yes':'y']) {
         $tpmEkiResult = Read-Host $tpmEkiPrompt -Prompt "Please confirm your response"
+        
         if (-Not [String]::IsNullOrEmpty($tpmEkiResult)) {
             if ($tpmEkiResult -eq 'y') {
                 Write-Output "Getting TpmEndorsementKeyInfo."
