@@ -1,77 +1,61 @@
-# Function to prompt user for TPM information
-function Prompt-TpmInfo {
-    $tpmInfoPrompt = "Do you want to get TPM info? (y/n): "
+# Prompt the user to get TPM information
+$tpmInfo = Read-Host "Do you want to get TPM Information? (Y/N)"
+
+if ($tpmInfo -eq 'Y' -or $tpmInfo -eq 'y') {
+    # Get TPM Information
+    Write-Output "Getting TPM Information..."
     
-    if ($PSDefaultParameterValues['Confirm:Yes':'y']) {
-        $tpmInfoResult = Read-Host $tpmInfoPrompt -Prompt "Please confirm your response"
+    try {
+        $tpmPresetn = Get-TpmProperty -Path "TpmPresetn"
+        $tpmReady = Get-TpmProperty -Path "TpmReady"
+        $tpmEnabled = Get-TpmProperty -Path "TpmEnabled"
+
+        Write-Output "TPM Presetn: $($tpmPresetn)"
+        Write-Output "TPM Ready: $($tpmReady)"
+        Write-Output "TPM Enabled: $($tpmEnabled)"
+
+    } catch {
+        Write-Error "Failed to get TPM information. Error: $_"
+    }
+
+    # Get TpmEndorsementKeyInfo
+    try {
+        $endorsementKey = Get-TpmProperty -Path "TpmEndorsementKeyInfo"
+        Write-Output "TPM Endorsement Key Info: $($endorsementKey)"
         
-        if (-Not [String]::IsNullOrEmpty($tpmInfoResult)) {
-            if ($tpmInfoResult -eq 'y') {
-                Write-Output "Getting TpmPresent, TpmReady, TPM Enabled."
-                Get-Tpm | Select-Object -Property TpmPresent, TpmReady, TPMEnabled
-            }
+    } catch {
+        Write-Error "Failed to get TPM endorsement key information. Error: $_"
+    }
+}
+
+# Prompt the user if they want to check Secure Boot
+$secureBoot = Read-Host "Do you want to check if secure boot is enabled? (Y/N)"
+
+if ($secureBoot -eq 'Y' -or $secureBoot -eq 'y') {
+    # Check if Secure Boot is enabled with confirm-securebootUEFI
+    try {
+        $secureBootEnabled = Confirm-SecureBootUEFI
+        Write-Output "Secure Boot Enabled: $($secureBootEnabled)"
+        
+    } catch {
+        Write-Error "Failed to check secure boot. Error: $_"
+    }
+}
+
+# Prompt the user if they want to get UEFI variable values related to Secure Boot
+$uefiVariables = Read-Host "Do you want to get UEFI variable values related to Secure Boot? (Y/N)"
+
+if ($uefiVariables -eq 'Y' -or $uefiVariables -eq 'y') {
+    # Get UEFI variables related to Secure Boot
+    try {
+        $variables = Get-SecureBootUEFIVariable -Name PK, KEK, db, dbx
+
+        foreach ($variable in $variables) {
+            Write-Output "Variable Name: $($variable.Name)"
+            Write-Output "Value: $($variable.Value)"
         }
-    } else {
-        Write-Host "TPM info prompt failed due to missing confirm function."
+        
+    } catch {
+        Write-Error "Failed to get UEFI variable values. Error: $_"
     }
-}
-
-# Function to get TPM Endorsement Key Info and display it
-function Prompt-TpmEndorsementKeyInfo {
-    $tpmEkiPrompt = "Do you want to get TpmEndorsementKeyInfo? (y/n): "
-    
-    if ($PSDefaultParameterValues['Confirm:Yes':'y']) {
-        $tpmEkiResult = Read-Host $tpmEkiPrompt -Prompt "Please confirm your response"
-        
-        if (-Not [String]::IsNullOrEmpty($tpmEkiResult)) {
-            if ($tpmEkiResult -eq 'y') {
-                Write-Output "Getting TpmEndorsementKeyInfo."
-                Get-Tpm | Select-Object -Property TpmEndorsementKeyInfo
-            }
-        }
-    } else {
-        Write-Host "TPM Endorsement Key Info prompt failed due to missing confirm function."
-    }
-}
-
-# Function to check Secure Boot status and display relevant UEFI variables
-function Prompt-CheckSecureBootStatus {
-    $secureBootPrompt = "Do you want to check if secure boot is enabled? (y/n): "
-    
-    if ($PSDefaultParameterValues['Confirm:Yes':'y']) {
-        $secureBootResult = Read-Host $secureBootPrompt -Prompt "Please confirm your response"
-        
-        Write-Output "Checking if Secure Boot is enabled."
-        
-        # Confirm Secure Boot UEFI
-        Get-SecurebootUEFI | Select-Object -ExpandProperty SecureBootEnabled
-        
-        # Get UEFI variable values related to Secure Boot
-        $securebootVariables = @(
-            @{Name="PK"; Value=(Get-Variable PK)}
-            @{Name="KEK"; Value=(Get-Variable KEK)}
-            @{Name="db"; Value=(Get-Variable db)}
-            @{Name="dbx"; Value=(Get-Variable dbx)}
-        )
-        
-        $securebootVariables | ForEach-Object { Write-Output " - Name: $_.Name; Value: $_.Value" }
-    } else {
-        Write-Host "Secure Boot status prompt failed due to missing confirm function."
-    }
-}
-
-# Main script loop
-while ($true) {
-    # Prompt for TPM info
-    Prompt-TpmInfo
-    
-    # Check if the user wants to get TPM Endorsement Key Info
-    Prompt-TpmEndorsementKeyInfo
-    
-    # Check if the user wants to check Secure Boot status
-    Prompt-CheckSecureBootStatus
-    
-    # Pause before the next prompt loop
-    Write-Host "`nPress any key to continue..."
-    Read-Host -Prompt ""
 }
