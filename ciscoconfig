@@ -7,7 +7,6 @@ no ip domain-lookup
 ip dhcp snooping
 spanning-tree portfast default
 spanning-tree portfast bpduguard default
-ip arp inspection validate src-mac dst-mac ip
 enable secret STUDENT
 service password-encryption
 banner motd #Authorized Access Only!#
