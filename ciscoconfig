@@ -102,17 +102,15 @@ switchport mode access
 switchport access vlan 20
 exit
 
-interface range f0/3 - 22
-shutdown
 interface range f0/23-24
 switchport mode trunk
+switchport trunk native vlan 30
 shutdown
 channel-group 1 mode active
 no shutdown
 exit
 interface port-channel 1
 switchport mode trunk
-exit
-copy run start
-
+switchport trunk native vlan 30
+end
 
