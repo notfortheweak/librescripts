@@ -58,6 +58,7 @@ ip dhcp pool Wireless
 network 192.168.100.128 255.255.255.224
 default-router 192.168.100.129
 dns-server 8.8.8.8
+exit
 
 copy run start
 
